@@ -5,6 +5,7 @@ import { HowItWorks } from "@/components/how-it-works"
 import { HowItWorksSteps } from "@/components/how-it-works-steps"
 import { BlogPosts } from "@/components/blog-posts"
 import { Footer } from "@/components/footer"
+import { FAQ } from "@/components/faq"
 
 export default function HomePage() {
   return (
@@ -16,6 +17,7 @@ export default function HomePage() {
         <HowItWorks />
         <HowItWorksSteps />
         <BlogPosts />
+        <FAQ />
       </main>
       <Footer />
     </div>
