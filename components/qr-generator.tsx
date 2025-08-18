@@ -10,11 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { QrCode, Barcode, Text } from "lucide-react"
+import { QrCode, Barcode, Text, Wifi, Lock } from "lucide-react"
 import { QRCode as QRCodeWithLogo } from "react-qrcode-logo"
 import { LogoUploader } from "./logo-uploader"
 import { triggerDownload } from "@/utils/ExportUtils"
 import { PDFDocument } from "pdf-lib"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type QRHandle = {
   download: (t?: "png" | "jpg" | "webp", name?: string) => void
@@ -25,6 +26,7 @@ export function QRGenerator() {
   const [sizeValue, setSizeValue] = useState("")
   const [fileType, setFileType] = useState<"png" | "svg" | "pdf">("png")
   const [qr_value, setQr_Value] = useState("Scan free")
+  const [wifi, setWifi] = useState({ name: "", password: "" })
   const [logo, setLogo] = useState<string | null>(null)
   const ref = useRef<QRHandle>(null)
   const id = "qr-main"
@@ -119,24 +121,72 @@ export function QRGenerator() {
             </div>
           </button>
         </div>
-        <div className="space-y-8">
-          <h2 className="text-3xl font-bold text-foreground">
-            {generatorType === "qr" ? "QR Code Generator" : "Barcode Generator"}
-          </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-            {/* Left Column - Form */}
+        <h2 className="text-3xl font-bold text-foreground mb-5">
+          {generatorType === "qr" ? "QR Code Generator" : "Barcode Generator"}
+        </h2>
+        <div className="space-y-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center ">
             <div className="lg:col-span-2 space-y-6">
-              {/* Search Input */}
-              <div className="relative">
-                <Text className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  placeholder="Enter your text or URL"
-                  className="pl-10 h-12 text-lg"
-                  onChange={(e) => setQr_Value(e.target.value)}
-                />
-              </div>
+              <Tabs
+                defaultValue="text"
+                className="w-full"
+                onChange={() => setWifi({ name: "", password: "" })}
+              >
+                <TabsList>
+                  <TabsTrigger value="text">Text or website</TabsTrigger>
+                  <TabsTrigger value="wifi">WiFi</TabsTrigger>
+                  <TabsTrigger value="geo">Geo Location</TabsTrigger>
+                  <TabsTrigger value="phone">Phone</TabsTrigger>
+                  <TabsTrigger value="email">Email</TabsTrigger>
+                </TabsList>
+                <TabsContent value="text">
+                  {/* Left Column - Form */}
+                  <div className="">
+                    {/* Search Input */}
+                    <div className="relative">
+                      <Text className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Input
+                        placeholder="Enter your text or website"
+                        className="pl-10 h-12 text-lg"
+                        onChange={(e) => setQr_Value(e.target.value)}
+                      />
+                    </div>
+                  </div>
 
+                  {/* Right Column - Format Options */}
+                </TabsContent>
+                <TabsContent value="wifi">
+                  <div className="flex items-center gap-3">
+                    {/* Search Input */}
+                    <div className="relative w-full">
+                      <Wifi className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Input
+                        placeholder="WiFi name"
+                        className="pl-10 h-12 text-lg w-full"
+                        onChange={(e) =>
+                          setWifi((prev) => ({ ...prev, name: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="relative w-full">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Input
+                        placeholder="WiFi password"
+                        className="pl-10 h-12 text-lg w-full"
+                        onChange={(e) =>
+                          setWifi((prev) => ({
+                            ...prev,
+                            password: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="geo"></TabsContent>
+                <TabsContent value="phone"></TabsContent>
+                <TabsContent value="email"></TabsContent>
+              </Tabs>
               <div className="space-y-2">
                 <LogoUploader value={logo} onChange={setLogo} />
               </div>
@@ -168,15 +218,17 @@ export function QRGenerator() {
               </div>
             </div>
 
-            {/* Right Column - Format Options */}
-
             <div className="p-1 bg-white rounded-xl">
               <QRCodeWithLogo
                 ref={ref as any}
                 id={id}
                 size={256}
                 style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                value={qr_value}
+                value={
+                  wifi.name
+                    ? `WIFI:T:WPA;S:${wifi.name};P:${wifi.password};;`
+                    : qr_value
+                }
                 // viewBox={`0 0 256 256`}
                 // type=""
                 ecLevel="H"
