@@ -118,8 +118,8 @@ export function LogoUploader({
               <path d="M20 12a8 8 0 1 0-16 0" />
             </svg>
             <p className="text-sm">
-              <span className="font-medium">Click to upload</span> or drag and
-              drop
+              <span className="font-medium">Click to upload </span> or drag and
+              drop LOGO
             </p>
             <p className="text-xs text-gray-500 mt-1">
               PNG/JPG/SVG, up to {maxSizeMB}MB. Auto-squared to {squareSize}px
