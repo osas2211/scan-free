@@ -10,7 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { QrCode, Barcode, Text, Wifi, Lock } from "lucide-react"
+import {
+  QrCode,
+  Barcode,
+  Text,
+  Wifi,
+  Lock,
+  MapPin,
+  Mail,
+  Phone,
+} from "lucide-react"
 import { QRCode as QRCodeWithLogo } from "react-qrcode-logo"
 import { LogoUploader } from "./logo-uploader"
 import { triggerDownload } from "@/utils/ExportUtils"
@@ -27,6 +36,8 @@ export function QRGenerator() {
   const [fileType, setFileType] = useState<"png" | "svg" | "pdf">("png")
   const [qr_value, setQr_Value] = useState("Scan free")
   const [wifi, setWifi] = useState({ name: "", password: "" })
+  const [geo, setGeo] = useState({ lat: "", long: "" })
+
   const [logo, setLogo] = useState<string | null>(null)
   const ref = useRef<QRHandle>(null)
   const id = "qr-main"
@@ -127,11 +138,7 @@ export function QRGenerator() {
         <div className="space-y-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center ">
             <div className="lg:col-span-2 space-y-6">
-              <Tabs
-                defaultValue="text"
-                className="w-full"
-                onChange={() => setWifi({ name: "", password: "" })}
-              >
+              <Tabs defaultValue="text" className="w-full">
                 <TabsList>
                   <TabsTrigger value="text">Text or website</TabsTrigger>
                   <TabsTrigger value="wifi">WiFi</TabsTrigger>
@@ -139,7 +146,13 @@ export function QRGenerator() {
                   <TabsTrigger value="phone">Phone</TabsTrigger>
                   <TabsTrigger value="email">Email</TabsTrigger>
                 </TabsList>
-                <TabsContent value="text">
+                <TabsContent
+                  value="text"
+                  onChange={() => {
+                    setGeo({ lat: "", long: "" })
+                    setWifi({ name: "", password: "" })
+                  }}
+                >
                   {/* Left Column - Form */}
                   <div className="">
                     {/* Search Input */}
@@ -164,7 +177,10 @@ export function QRGenerator() {
                         placeholder="WiFi name"
                         className="pl-10 h-12 text-lg w-full"
                         onChange={(e) =>
-                          setWifi((prev) => ({ ...prev, name: e.target.value }))
+                          setWifi({
+                            password: wifi.password,
+                            name: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -183,9 +199,82 @@ export function QRGenerator() {
                     </div>
                   </div>
                 </TabsContent>
-                <TabsContent value="geo"></TabsContent>
-                <TabsContent value="phone"></TabsContent>
-                <TabsContent value="email"></TabsContent>
+                <TabsContent
+                  value="geo"
+                  onChange={() => {
+                    setWifi({ name: "", password: "" })
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Search Input */}
+                    <div className="relative w-full">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Input
+                        placeholder="Latitude"
+                        className="pl-10 h-12 text-lg w-full"
+                        onChange={(e) =>
+                          setGeo({
+                            long: geo.long,
+                            lat: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="relative w-full">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Input
+                        placeholder="Longitude"
+                        className="pl-10 h-12 text-lg w-full"
+                        onChange={(e) =>
+                          setGeo((prev) => ({
+                            ...prev,
+                            long: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent
+                  value="phone"
+                  onChange={() => {
+                    setGeo({ lat: "", long: "" })
+                    setWifi({ name: "", password: "" })
+                  }}
+                >
+                  <div className="">
+                    {/* Search Input */}
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Input
+                        placeholder="Enter phone number"
+                        className="pl-10 h-12 text-lg"
+                        onChange={(e) => setQr_Value(`tel:${e.target.value}`)}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent
+                  value="email"
+                  onChange={() => {
+                    setGeo({ lat: "", long: "" })
+                    setWifi({ name: "", password: "" })
+                  }}
+                >
+                  <div className="">
+                    {/* Search Input */}
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                      <Input
+                        placeholder="Enter email"
+                        className="pl-10 h-12 text-lg"
+                        onChange={(e) =>
+                          setQr_Value(`mailto:${e.target.value}`)
+                        }
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
               </Tabs>
               <div className="space-y-2">
                 <LogoUploader value={logo} onChange={setLogo} />
@@ -227,6 +316,8 @@ export function QRGenerator() {
                 value={
                   wifi.name
                     ? `WIFI:T:WPA;S:${wifi.name};P:${wifi.password};;`
+                    : geo.lat
+                    ? `geo:${geo.lat},${geo.long}`
                     : qr_value
                 }
                 // viewBox={`0 0 256 256`}
